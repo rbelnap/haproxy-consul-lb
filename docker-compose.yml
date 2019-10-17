@@ -4,11 +4,19 @@ services:
   consul:
     container_name: consul
     image: consul
-    expose:
-      - "8300"
-      - "8400"
-      - "8500"
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    environment:
+      SERVICE_8300_IGNORE: 'yes'
+      SERVICE_8301_IGNORE: 'yes'
+      SERVICE_8302_IGNORE: 'yes'
+      SERVICE_8400_IGNORE: 'yes'
+      SERVICE_8600_IGNORE: 'yes'
+      SERVICE_8500_NAME: consul-ui
+      SERVICE_8600_NAME: consul-dns
     restart: always
+
   registrator:
     container_name: registrator
     image: gliderlabs/registrator:master
@@ -18,12 +26,17 @@ services:
     restart: always
     depends_on:
       - consul
+
   haproxy:
     build: .
     container_name: haproxy
     image: test/haproxy-consul
     ports:
-      - 80
+      - 8080:80
+      - 1936:1936
+    environment:
+      SERVICE_80_NAME: lb-http
+      SERVICE_1936_NAME: lb-ui
 
 networks:
   default:
