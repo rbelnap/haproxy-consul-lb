@@ -18,6 +18,7 @@ services:
 
   registrator:
     container_name: registrator
+    hostname: registrator #needed for consistent consul ids, due to -internal
     image: gliderlabs/registrator:master
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock"
