@@ -17,18 +17,21 @@ defaults
 
 frontend http-in
     bind *:80{{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "web"}}
-    acl app{{$i}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
+    acl {{$a.Name}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
     {{range $i,$a:=services}}{{range .Tags}}{{if eq . "web"}}
-    use_backend srvs_app{{$i}} if app{{$i}}{{end}}{{end}}{{end}}
+    use_backend {{$a.Name}}_pool if {{$a.Name}}{{end}}{{end}}{{end}}
 
 {{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "web"}}
-backend srvs_app{{$i}}
+backend {{$a.Name}}_pool
     mode http
     balance roundrobin
     option forwardfor
     option httpchk HEAD / HTTP/1.1\r\nHost:localhost
     reqrep ^([^\ ]*\ /){{$path}}[/]?(.*)     \1\2{{range $c,$d:=service $a.Name}}
-    server host{{$c}} {{.Address}}:{{.Port}} check{{end}}{{end}}{{end}}{{end}}
+    server {{$c}} {{.Address}}:{{.Port}} check
+# a = {{$a}}
+# d = {{$d}}
+{{end}}{{end}}{{end}}{{end}}
 
 listen stats
     bind *:1936
