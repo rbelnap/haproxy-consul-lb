@@ -12,7 +12,6 @@ services:
       SERVICE_8301_IGNORE: 'yes'
       SERVICE_8302_IGNORE: 'yes'
       SERVICE_8400_IGNORE: 'yes'
-      SERVICE_8600_IGNORE: 'yes'
       SERVICE_8500_NAME: consul-ui
       SERVICE_8600_NAME: consul-dns
     restart: always
