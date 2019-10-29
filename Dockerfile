@@ -1,6 +1,6 @@
 FROM haproxy:alpine
 
-ENV CONSUL_TEMPLATE_VERSION=0.16.0
+ENV CONSUL_TEMPLATE_VERSION=0.22.0
 
 # cribbed from https://github.com/anthcourtney/docker-consul-template-haproxy/blob/master/haproxy/Dockerfile
 RUN apk --update add haproxy wget
@@ -15,7 +15,7 @@ COPY files/haproxy.json /tmp/haproxy.json
 COPY files/haproxy.ctmpl /tmp/haproxy.ctmpl
 
 ENTRYPOINT ["consul-template","-config=/tmp/haproxy.json"]
-CMD ["-consul=consul:8500"]
+CMD ["-consul-addr=consul:8500" ]
 
 
 
