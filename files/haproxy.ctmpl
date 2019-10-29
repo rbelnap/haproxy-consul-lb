@@ -21,6 +21,20 @@ frontend https-in
     {{range $i,$a:=services}}{{range .Tags}}{{if eq . "https"}}
     use_backend {{$a.Name}}_pool if {{$a.Name}}{{end}}{{end}}{{end}}
 
+    # if service has tag 'vhostname=' setup acl for Host: header, using vhostname
+    {{ range $i,$a:=services -}}
+        {{ range .Tags -}}
+            {{ if . | regexMatch "vhostname=" }}
+    acl host_{{$a.Name}} hdr(host) -i {{ . | regexReplaceAll ".*=" "" }}
+    use_backend {{$a.Name}}_pool if host_{{$a.Name}}
+            {{ end }}
+            {{ if . | regexMatch "vhostalias=" }}
+    acl host_{{$a.Name}} hdr(host) -i {{ . | regexReplaceAll ".*=" "" }}
+    use_backend {{$a.Name}}_pool if host_{{$a.Name }}
+            {{- end }}
+        {{- end }}
+    {{- end }}
+
 frontend http-in
     bind *:80{{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "http"}}
     acl {{$a.Name}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
