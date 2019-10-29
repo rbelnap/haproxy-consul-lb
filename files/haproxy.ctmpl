@@ -28,10 +28,6 @@ frontend https-in
     acl host_{{$a.Name}} hdr(host) -i {{ . | regexReplaceAll ".*=" "" }}
     use_backend {{$a.Name}}_pool if host_{{$a.Name}}
             {{ end }}
-            {{ if . | regexMatch "vhostalias=" }}
-    acl host_{{$a.Name}} hdr(host) -i {{ . | regexReplaceAll ".*=" "" }}
-    use_backend {{$a.Name}}_pool if host_{{$a.Name }}
-            {{- end }}
         {{- end }}
     {{- end }}
 
