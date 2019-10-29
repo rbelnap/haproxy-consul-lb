@@ -3,7 +3,7 @@ global
     log 127.0.0.1   local1 notice
     debug
     stats timeout 30s
-    maxconn {{with $maxconn:=key "service/haproxy/maxconn"}}{{$maxconn}}{{else}}4096{{end}}
+    maxconn 8192
  
 defaults
     log global
@@ -35,8 +35,6 @@ backend {{$a.Name}}_pool
     option httpchk HEAD / HTTP/1.1\r\nHost:localhost
     reqrep ^([^\ ]*\ /){{$path}}[/]?(.*)     \1\2{{range $c,$d:=service $a.Name}}
     server {{$c}} {{.Address}}:{{.Port}} check
-# a = {{$a}}
-# d = {{$d}}
 {{end}}{{end}}{{end}}{{end}}
 
 listen stats
