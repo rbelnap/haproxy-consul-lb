@@ -15,10 +15,16 @@ defaults
     timeout client  50000
     timeout server  50000{{end}}
 
-frontend http-in
-    bind *:80{{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "web"}}
+frontend https-in
+    bind *:443 ssl crt /etc/ssl/certs/ {{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "https"}}
     acl {{$a.Name}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
-    {{range $i,$a:=services}}{{range .Tags}}{{if eq . "web"}}
+    {{range $i,$a:=services}}{{range .Tags}}{{if eq . "https"}}
+    use_backend {{$a.Name}}_pool if {{$a.Name}}{{end}}{{end}}{{end}}
+
+frontend http-in
+    bind *:80{{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "http"}}
+    acl {{$a.Name}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
+    {{range $i,$a:=services}}{{range .Tags}}{{if eq . "http"}}
     use_backend {{$a.Name}}_pool if {{$a.Name}}{{end}}{{end}}{{end}}
 
 {{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "web"}}

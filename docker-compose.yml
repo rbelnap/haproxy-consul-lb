@@ -33,10 +33,14 @@ services:
     image: test/haproxy-consul
     ports:
       - 8080:80
+      - 8443:443
       - 1936:1936
+    volumes:
+      - "./ssl:/etc/ssl/certs"
     environment:
       SERVICE_80_NAME: lb-http
-      SERVICE_1936_NAME: lb-ui
+      SERVICE_443_NAME: lb-https
+      SERVICE_1936_NAME: lb-stats
 
 networks:
   default:
