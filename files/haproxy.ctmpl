@@ -3,7 +3,7 @@ global
     log 127.0.0.1   local1 notice
     debug
     stats timeout 30s
-    maxconn 8192
+    maxconn {{keyOrDefault "service/haproxy/maxconn" "4096" }}
  
 defaults
     log global
