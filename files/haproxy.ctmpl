@@ -16,26 +16,33 @@ defaults
     timeout server  50000{{end}}
 
 frontend https-in
-    bind *:443 ssl crt /etc/ssl/certs/ {{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "https"}}
-    acl {{$a.Name}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
-    {{range $i,$a:=services}}{{range .Tags}}{{if eq . "https"}}
-    use_backend {{$a.Name}}_pool if {{$a.Name}}{{end}}{{end}}{{end}}
+    bind *:443 ssl crt /etc/ssl/certs/
 
     # if service has tag 'vhostname=' setup acl for Host: header, using vhostname
     {{ range $i,$a:=services -}}
         {{ range .Tags -}}
             {{ if . | regexMatch "vhostname=" }}
-    acl host_{{$a.Name}} hdr(host) -i {{ . | regexReplaceAll ".*=" "" }}
+    acl host_{{$a.Name}} hdr_dom(host) -i {{ . | regexReplaceAll ".*=" "" }}
     use_backend {{$a.Name}}_pool if host_{{$a.Name}}
             {{ end }}
         {{- end }}
     {{- end }}
 
 frontend http-in
-    bind *:80{{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "http"}}
-    acl {{$a.Name}} path_beg -i /{{$path}}{{end}}{{end}}{{end}}
-    {{range $i,$a:=services}}{{range .Tags}}{{if eq . "http"}}
-    use_backend {{$a.Name}}_pool if {{$a.Name}}{{end}}{{end}}{{end}}
+    bind *:80
+
+    # if service has tag 'vhostname=' setup acl for Host: header, using vhostname
+    {{ range $i,$a:=services -}}
+        {{ if in .Tags "http" }}
+        {{ range .Tags -}}
+            {{ if . | regexMatch "vhostname=" }}
+    acl host_{{$a.Name}} hdr_dom(host) -i {{ . | regexReplaceAll ".*=" "" }}
+    use_backend {{$a.Name}}_pool if host_{{$a.Name}}
+            {{ end }}
+        {{- end }}
+        {{- end }}
+    {{- end }}
+
 
 {{range $i,$a:=services}}{{$path:=.Name}}{{range .Tags}}{{if eq . "web"}}
 backend {{$a.Name}}_pool
@@ -43,7 +50,7 @@ backend {{$a.Name}}_pool
     balance roundrobin
     option forwardfor
     option httpchk HEAD / HTTP/1.1\r\nHost:localhost
-    reqrep ^([^\ ]*\ /){{$path}}[/]?(.*)     \1\2{{range $c,$d:=service $a.Name}}
+    {{- range $c,$d:=service $a.Name }}
     server {{$c}} {{.Address}}:{{.Port}} check
 {{end}}{{end}}{{end}}{{end}}
 
