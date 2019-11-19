@@ -10,6 +10,7 @@ HTTP_LISTEN: true/false  determines if there will be an http listener.  Otherwis
 ## service tags used by haproxy
 
 `vhostname=virtualhost.name.org` Set this to define virtual host names that the lb will route to the service.  Can be specified more than once.
+
 `web` This controls if a backend will be created.  You'll want most services to define this, it could probably be named better.
 
 ## how to play with this
